@@ -1,6 +1,7 @@
 import {BaseNode} from "../../utills/parser/types.ts";
 
 interface TopicLink {
+    topicId: string;
     topicNumber: number;
     moduleNumber: number;
     topicName: string;

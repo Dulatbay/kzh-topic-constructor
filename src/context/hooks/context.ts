@@ -1,5 +1,6 @@
 import {createContext, useContext} from "react";
 import {BaseNode, Stack, TitledContainer} from "../../utills/parser/types.ts";
+import {TopicDetailResponse} from "../../services/module/types.ts";
 
 interface SelectedNodeContextProps {
     selectedNodeData: BaseNode | null;
@@ -14,6 +15,8 @@ interface SelectedNodeContextProps {
     addNodeToSelectedStack: (newNode: BaseNode) => void;
     isAvailableToAdd: boolean;
     handleIsSaved: (isSaved: boolean) => void;
+    reset: () => void;
+    setApiResponse: (apiResponse: TopicDetailResponse) => void;
 }
 
 export const SelectedNodeContext = createContext<SelectedNodeContextProps | undefined>(undefined);

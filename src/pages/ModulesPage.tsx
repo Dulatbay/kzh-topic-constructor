@@ -14,7 +14,7 @@ const ModulesPage = () => {
         setFullData(null);
         localStorage.removeItem("isSaved")
         fetchModules();
-    }, [setFullData, fetchModules]);
+    }, [fetchModules]);
 
     if (isLoading) return <div>Загрузка модулей...</div>;
     if (error) return <div className="text-red-500">Ошибка загрузки</div>;

@@ -8,7 +8,7 @@ import {useSearchParams} from "react-router-dom";
 
 const MainPage = () => {
     const [fetchTopicByParamsQuery, {isLoading, error, data}] = useLazyFetchTopicByParamsQuery();
-    const {fullData, setFullData, handleIsSaved} = useSelectedNode();
+    const {fullData, setFullData, reset, setApiResponse} = useSelectedNode();
     const [searchParams] = useSearchParams();
     const moduleNumber = searchParams.get("module") ?? "0";
     const topicNumber = searchParams.get("topic") ?? "0";
@@ -16,8 +16,10 @@ const MainPage = () => {
     useEffect(() => {
         const fetch = async () => {
             await fetchTopicByParamsQuery({moduleNumber, topicNumber});
-            if (data)
+            if (data) {
                 setFullData(data.content)
+                setApiResponse(data)
+            }
         }
 
         const storedData = localStorage.getItem("fullData");
@@ -26,11 +28,11 @@ const MainPage = () => {
         } else {
             fetch()
         }
-    }, [data, fetchTopicByParamsQuery, moduleNumber, setFullData, topicNumber]);
+    }, [data, fetchTopicByParamsQuery, moduleNumber, topicNumber]);
 
 
     const handleReset = async () => {
-        handleIsSaved(true);
+        reset()
         await fetchTopicByParamsQuery({moduleNumber: moduleNumber, topicNumber: topicNumber});
 
         if (data) {

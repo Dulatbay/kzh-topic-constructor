@@ -1,7 +1,9 @@
-import {ReactNode, useEffect, useState} from "react";
+import {ReactNode, useCallback, useEffect, useState} from "react";
 import {BaseNode, IconText, NodeType, Stack, Text, TitledContainer} from "../utills/parser/types.ts";
 import {SelectedNodeContext} from "./hooks/context.ts";
 import {isCenteredContainer, isIconText, isStackNode, isTitledContainer} from "../utills/parser/Parser.tsx";
+import {useSetTopicContentMutation} from "../services/module/api.ts";
+import {TopicDetailResponse} from "../services/module/types.ts";
 
 interface SelectedNodeProviderProps {
     children: ReactNode;
@@ -10,9 +12,14 @@ interface SelectedNodeProviderProps {
 export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
     const [selectedNodeData, setSelectedNodeData] = useState<BaseNode | null>(null);
     const [fullData, setFullData] = useState<BaseNode | null>(null);
+    const [apiResponse, setApiResponse] = useState<TopicDetailResponse | null>(localStorage.getItem("apiResponse") ? JSON.parse(localStorage.getItem("apiResponse")!) : null);
     const [isSaved, setIsSaved] = useState(localStorage.getItem("isSaved") ? !(localStorage.getItem("isSaved") === "false") : true);
     const [isDeletable, setIsDeletable] = useState(false);
     const [isAvailableToAdd, setIsAvailableToAdd] = useState(false);
+    const [undoStack, setUndoStack] = useState<BaseNode[]>([]);
+    const [redoStack, setRedoStack] = useState<BaseNode[]>([]);
+    const [setTopicContent] = useSetTopicContentMutation();
+
 
     useEffect(() => {
         if (selectedNodeData) {
@@ -53,6 +60,61 @@ export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
         setSelectedNodeData(null)
         setIsDeletable(false)
     }, [setSelectedNodeData, fullData, selectedNodeData]);
+    useEffect(() => {
+        if (fullData) {
+            localStorage.setItem("fullData", JSON.stringify(fullData));
+        } else {
+            setSelectedNodeData(null);
+            localStorage.removeItem("fullData");
+        }
+    }, [fullData]);
+
+    const undo = useCallback(() => {
+        console.log("SALAM",undoStack.length)
+        if (undoStack.length > 1) {
+            const prevState = undoStack[0];
+            setUndoStack((prev) => prev.slice(1));
+            setRedoStack((prev) => [fullData!, ...prev]);
+            setFullData(prevState);
+            handleIsSaved(undoStack.length == 2);
+        }
+    }, [undoStack, fullData]);
+
+    const redo = useCallback(() => {
+        if (redoStack.length > 0) {
+            const nextState = redoStack[0];
+            setRedoStack((prev) => prev.slice(1));
+            setUndoStack((prev) => [fullData!, ...prev]);
+            setFullData(nextState);
+            handleIsSaved(false);
+        }
+    }, [redoStack, fullData]);
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.ctrlKey && event.key === "z") {
+                undo();
+            } else if (event.ctrlKey && event.shiftKey && event.key === "Z") {
+                redo();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [undo, redo]);
+
+    const handleSetApiResponce = (apiResponse: TopicDetailResponse) => {
+        localStorage.setItem("apiResponse", JSON.stringify(apiResponse));
+        setApiResponse(apiResponse);
+    }
+
+    const handleSetFullData = (obj: BaseNode | null) => {
+        if (obj && fullData)
+            setUndoStack((prev) => [fullData!, ...prev]);
+        else
+            setUndoStack([])
+        setRedoStack([]);
+        setFullData(obj);
+    };
 
     const handleIsSaved = (isSaved: boolean) => {
         setIsSaved(isSaved)
@@ -100,18 +162,10 @@ export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
             return node;
         };
 
-        setFullData(updateNodeInTree(fullData));
+        handleSetFullData(updateNodeInTree(fullData));
         handleIsSaved(false);
     };
 
-    useEffect(() => {
-        if (fullData) {
-            localStorage.setItem("fullData", JSON.stringify(fullData));
-        } else {
-            setSelectedNodeData(null);
-            localStorage.removeItem("fullData");
-        }
-    }, [fullData]);
 
     const deleteNodeById = (id: string, node: BaseNode | null): BaseNode | null => {
         if (!node) return null;
@@ -150,7 +204,7 @@ export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
 
         const updatedData = deleteNodeById(selectedNodeData.id, fullData);
 
-        setFullData(updatedData);
+        handleSetFullData(updatedData);
         setSelectedNodeData(null);
         handleIsSaved(false);
     };
@@ -194,30 +248,29 @@ export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
             return node;
         };
 
-        setFullData(updateNodeInTree(fullData));
+        handleSetFullData(updateNodeInTree(fullData));
         handleIsSaved(false);
     };
 
     const saveFullData = () => {
-        if (!fullData) return;
+        if (!fullData || !apiResponse) return;
 
-        fetch("your-api-endpoint", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(fullData),
-        })
-            .then((res) => res.json())
-            .then(() => {
-                console.log("Данные успешно сохранены");
-                handleIsSaved(true);
-            })
-            .catch((err) => console.error("Ошибка при сохранении", err));
-    };
+        setTopicContent({topicId: apiResponse.current.topicId, content: fullData})
+            .then(() => handleIsSaved(true));
+    }
+
+    const reset = () => {
+        handleSetFullData(null)
+        handleIsSaved(true)
+        setSelectedNodeData(null)
+        setIsDeletable(false)
+        setIsAvailableToAdd(false)
+    }
 
     return (
         <SelectedNodeContext.Provider
             value={{
-                setFullData,
+                setFullData: handleSetFullData,
                 selectedNodeData,
                 setSelectedNodeData,
                 fullData,
@@ -228,7 +281,9 @@ export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
                 updateSelectedNodeProperty,
                 saveFullData,
                 handleDeleteNode,
-                isDeletable
+                isDeletable,
+                reset,
+                setApiResponse: handleSetApiResponce,
             }}
         >
             {children}

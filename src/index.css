@@ -34,3 +34,24 @@ body {
     padding: 0;
     box-sizing: border-box;
 }
+
+/* Стили для основного контейнера */
+.split {
+    display: flex;
+}
+
+/* Стили для разделителя */
+.gutter {
+    background: #666; /* Цвет разделителя */
+    width: 12px; /* Увеличенная ширина */
+    cursor: ew-resize; /* Курсор изменения размера */
+    transition: background 0.2s ease-in-out; /* Плавный эффект */
+}
+
+/* При наведении делаем разделитель ярче */
+.gutter:hover {
+    background: #888;
+}
+
+
+

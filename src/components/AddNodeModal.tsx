@@ -7,7 +7,7 @@ import {
     FlexWrap,
     FontColor,
     FontSize,
-    FontWeight,
+    FontWeight, IconText,
     JustifyContent,
     NodeType,
     Stack,
@@ -27,7 +27,7 @@ const AddNodeModal = ({onClose}: { onClose: () => void }) => {
         if (!selectedType) return;
 
         let newNode: BaseNode;
-        const newId = uuidv4(); // Генерация ID
+        const newId = uuidv4();
 
         if (selectedType === NodeType.TEXT) {
             newNode = {
@@ -77,9 +77,22 @@ const AddNodeModal = ({onClose}: { onClose: () => void }) => {
                     nodeType: childNodeType,
                 } as BaseNode,
             } as TitledContainer;
-        } else {
-            return;
-        }
+        } else if(selectedType === NodeType.ICON_TEXT){
+            newNode = {
+                id: newId,
+                nodeType: NodeType.ICON_TEXT,
+                text: {
+                    id: uuidv4(),
+                    nodeType: NodeType.TEXT,
+                    htmltext: "Текст",
+                    fontSize: FontSize.SMALL,
+                    textAlign: TextAlign.LEFT,
+                    fontColor: FontColor.DEFAULT,
+                    fontWeight: FontWeight.REGULAR,
+                } as Text,
+                icon: "icon",
+            } as IconText;
+        } else return;
 
         addNodeToSelectedStack(newNode);
         onClose();

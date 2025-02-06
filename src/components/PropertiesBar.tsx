@@ -20,8 +20,30 @@ import {
     isTextNode,
     isStackNode, isIconText,
 } from "../utills/parser/Parser.tsx";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useSelectedNode} from "../context/hooks/context.ts";
+import {FaChevronDown, FaChevronRight} from "react-icons/fa";
+
+const CollapsibleSection = ({title, children}: {
+    title: string,
+    children: React.ReactNode[] | React.ReactNode | null
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <div className="mt-4 border-b border-gray-600 pb-2">
+            <button
+                className="flex items-center justify-between w-full text-left py-2 px-3  rounded hover:bg-[#282828] transition"
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <span className="text-white font-bold">{title}</span>
+                {isOpen ? <FaChevronDown className="text-gray-300"/> : <FaChevronRight className="text-gray-300"/>}
+            </button>
+
+            {isOpen && <div className="mt-2">{children}</div>}
+        </div>
+    );
+};
 
 const PropertiesBar = () => {
     const {selectedNodeData, updateSelectedNodeProperty, handleDeleteNode, isDeletable} = useSelectedNode();
@@ -59,163 +81,124 @@ const PropertiesBar = () => {
                 </button>
             )}
 
-
-            <div className="mt-2">
-                <label className="block text-gray-300 mb-1">Background</label>
-                <select
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={selectedNode.background || "DEFAULT"}
-                    onChange={(e) => handleChange("background", e.target.value)}
-                >
-                    {Object.values(Background).map((option) => (
-                        <option key={option} value={option}>{option}</option>
-                    ))}
-                </select>
-            </div>
-
-            <div className="mt-2">
-                <label className="block text-gray-300 mb-1">Border Color</label>
-                <select
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={selectedNode.borderColor || "DEFAULT"}
-                    onChange={(e) => handleChange("borderColor", e.target.value)}
-                >
-                    {Object.values(FontColor).map((option) => (
-                        <option key={option} value={option}>{option}</option>
-                    ))}
-                </select>
-            </div>
-
-            <div className="mt-2">
-                <label className="block text-gray-300 mb-1">Border type</label>
-                <select
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={selectedNode.borderType || "NONE"}
-                    onChange={(e) => handleChange("borderType", e.target.value)}
-                >
-                    {Object.values(BorderType).map((option) => (
-                        <option key={option} value={option}>{option}</option>
-                    ))}
-                </select>
-            </div>
-
-            <div className="mt-2">
-                <label className="block text-gray-300 mb-1">Border Radius</label>
-                <input
-                    type="text"
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={selectedNode.borderRadius || ""}
-                    onChange={(e) => handleChange("borderRadius", (e.target.value))}
-                />
-            </div>
-
-            <div className="mt-2">
-                <label className="block text-gray-300 mb-1">Opacity</label>
-                <input
-                    type="number"
-                    step={0.1}
-                    max={1}
-                    min={0}
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={selectedNode.opacity === undefined ? 1 : selectedNode.opacity}
-                    onChange={(e) => handleChange("opacity", parseFloat(e.target.value))}
-                />
-            </div>
-
-            <div className="mt-2">
-                <label className="block text-gray-300 mb-1">Padding</label>
-                <input
-                    type="text"
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={selectedNode.padding || ""}
-                    onChange={(e) => handleChange("padding", (e.target.value))}
-                />
-            </div>
-
-            <div className="mt-2">
-                <label className="block text-gray-300 mb-1">Margin</label>
-                <input
-                    type="text"
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={selectedNode.margin || ""}
-                    onChange={(e) => handleChange("margin", (e.target.value))}
-                />
-            </div>
-
-            <div className="mt-2">
-                <label className="block text-gray-300 mb-1">Width</label>
-                <input
-                    type="text"
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={selectedNode.width || ""}
-                    onChange={(e) => handleChange("width", (e.target.value))}
-                />
-            </div>
-
-            <div className="mt-2">
-                <label className="block text-gray-300 mb-1">Height</label>
-                <input
-                    type="text"
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={selectedNode.height || ""}
-                    onChange={(e) => handleChange("height", (e.target.value))}
-                />
-            </div>
-
-            <div className="mt-2">
-                <label className="block text-gray-300 mb-1">Overflow X</label>
-                <input
-                    type="text"
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={selectedNode.overflowX || ""}
-                    onChange={(e) => handleChange("overflowX", (e.target.value))}
-                />
-            </div>
-
-            <div className="mt-2">
-                <label className="block text-gray-300 mb-1">Overflow Y</label>
-                <input
-                    type="text"
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={selectedNode.overflowY || ""}
-                    onChange={(e) => handleChange("overflowY", (e.target.value))}
-                />
-            </div>
-
-            <div className="mt-2">
-                <label className="block text-gray-300 mb-1">Flex</label>
-                <input
-                    type="number"
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={selectedNode.flex || ""}
-                    onChange={(e) => handleChange("overflowY", (e.target.value))}
-                />
-            </div>
-
-            <div className="mt-2">
-                <label className="block text-gray-300 mb-1">Min Width</label>
-                <input
-                    type="text"
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={selectedNode.minWidth || ""}
-                    onChange={(e) => handleChange("minWidth", (e.target.value))}
-                />
-            </div>
-
-            <div className="mt-2">
-                <label className="block text-gray-300 mb-1">Min Height</label>
-                <input
-                    type="text"
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={selectedNode.minHeight || ""}
-                    onChange={(e) => handleChange("minHeight", (e.target.value))}
-                />
-            </div>
-
+            <CollapsibleSection title={"Base node style"}>
+                {/*Общие свойства*/}
+                <div className="mt-2">
+                    <label className="block text-gray-300 mb-1">Background</label>
+                    <select
+                        className="w-full p-2 bg-gray-700 text-white rounded"
+                        value={selectedNode.background || "DEFAULT"}
+                        onChange={(e) => handleChange("background", e.target.value)}
+                    >
+                        {Object.values(Background).map((option) => (
+                            <option key={option} value={option}>{option}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="mt-2">
+                    <label className="block text-gray-300 mb-1">Border Color</label>
+                    <select
+                        className="w-full p-2 bg-gray-700 text-white rounded"
+                        value={selectedNode.borderColor || "DEFAULT"}
+                        onChange={(e) => handleChange("borderColor", e.target.value)}
+                    >
+                        {Object.values(FontColor).map((option) => (
+                            <option key={option} value={option}>{option}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="mt-2">
+                    <label className="block text-gray-300 mb-1">Border type</label>
+                    <select
+                        className="w-full p-2 bg-gray-700 text-white rounded"
+                        value={selectedNode.borderType || "NONE"}
+                        onChange={(e) => handleChange("borderType", e.target.value)}
+                    >
+                        {Object.values(BorderType).map((option) => (
+                            <option key={option} value={option}>{option}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="mt-2">
+                    <label className="block text-gray-300 mb-1">Border Radius</label>
+                    <input
+                        type="text"
+                        className="w-full p-2 bg-gray-700 text-white rounded"
+                        value={selectedNode.borderRadius || ""}
+                        onChange={(e) => handleChange("borderRadius", (e.target.value))}
+                    />
+                </div>
+                <div className="mt-2">
+                    <label className="block text-gray-300 mb-1">Opacity</label>
+                    <input
+                        type="number"
+                        step={0.1}
+                        max={1}
+                        min={0}
+                        className="w-full p-2 bg-gray-700 text-white rounded"
+                        value={selectedNode.opacity === undefined ? 1 : selectedNode.opacity}
+                        onChange={(e) => handleChange("opacity", parseFloat(e.target.value))}
+                    />
+                </div>
+                <div className="mt-2">
+                    <label className="block text-gray-300 mb-1">Padding</label>
+                    <input
+                        type="text"
+                        className="w-full p-2 bg-gray-700 text-white rounded"
+                        value={selectedNode.padding || ""}
+                        onChange={(e) => handleChange("padding", (e.target.value))}
+                    />
+                </div>
+                <div className="mt-2">
+                    <label className="block text-gray-300 mb-1">Margin</label>
+                    <input
+                        type="text"
+                        className="w-full p-2 bg-gray-700 text-white rounded"
+                        value={selectedNode.margin || ""}
+                        onChange={(e) => handleChange("margin", (e.target.value))}
+                    />
+                </div>
+                <div className="mt-2">
+                    <label className="block text-gray-300 mb-1">Overflow X</label>
+                    <input
+                        type="text"
+                        className="w-full p-2 bg-gray-700 text-white rounded"
+                        value={selectedNode.overflowX || ""}
+                        onChange={(e) => handleChange("overflowX", (e.target.value))}
+                    />
+                </div>
+                <div className="mt-2">
+                    <label className="block text-gray-300 mb-1">Overflow Y</label>
+                    <input
+                        type="text"
+                        className="w-full p-2 bg-gray-700 text-white rounded"
+                        value={selectedNode.overflowY || ""}
+                        onChange={(e) => handleChange("overflowY", (e.target.value))}
+                    />
+                </div>
+                <div className="mt-2">
+                    <label className="block text-gray-300 mb-1">Flex</label>
+                    <input
+                        type="number"
+                        className="w-full p-2 bg-gray-700 text-white rounded"
+                        value={selectedNode.flex || ""}
+                        onChange={(e) => handleChange("overflowY", (e.target.value))}
+                    />
+                </div>
+                <div className="mt-2">
+                    <label className="block text-gray-300 mb-1">Min Height</label>
+                    <input
+                        type="text"
+                        className="w-full p-2 bg-gray-700 text-white rounded"
+                        value={selectedNode.minHeight || ""}
+                        onChange={(e) => handleChange("minHeight", (e.target.value))}
+                    />
+                </div>
+            </CollapsibleSection>
 
             {/* Свойства для текста */}
             {isTextNode(selectedNode) && (
-                <>
+                <CollapsibleSection title={"Text node style"}>
                     <div className="mt-2">
                         <label className="block text-gray-300 mb-1">Font size</label>
                         <select
@@ -233,7 +216,7 @@ const PropertiesBar = () => {
                         <label className="block text-gray-300 mb-1">Text align</label>
                         <select
                             className="w-full p-2 bg-gray-700 text-white rounded"
-                            value={selectedNode.textAlign || "left"}
+                            value={selectedNode.textAlign}
                             onChange={(e) => handleChange("textAlign", e.target.value)}
                         >
                             {Object.values(TextAlign).map((option) => (
@@ -262,12 +245,12 @@ const PropertiesBar = () => {
                             onChange={(e) => handleChange("htmltext", (e.target.value))}
                         />
                     </div>
-                </>
+                </CollapsibleSection>
             )}
 
             {/* Свойства для Stack */}
             {isStackNode(selectedNode) && (
-                <>
+                <CollapsibleSection title={"Stack node style"}>
                     <div className="mt-2">
                         <label className="text-gray-300 mb-1">Is Vertical</label>
                         <input
@@ -326,11 +309,11 @@ const PropertiesBar = () => {
                             ))}
                         </select>
                     </div>
-                </>
+                </CollapsibleSection>
             )}
 
             {isIconText(selectedNode) && (
-                <>
+                <CollapsibleSection title={"IconText node style"}>
                     <div className="mt-2">
                         <label className="block text-gray-300 mb-1">Icon</label>
                         <input
@@ -340,7 +323,7 @@ const PropertiesBar = () => {
                             onChange={(e) => handleChange("icon", e.target.value)}
                         />
                     </div>
-                </>
+                </CollapsibleSection>
             )}
 
 

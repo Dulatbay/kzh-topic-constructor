@@ -6,7 +6,7 @@ import {
     FontColor,
     FontSize,
     FontWeight,
-    JustifyContent
+    JustifyContent, TextAlign
 } from "./types";
 import React from "react";
 
@@ -88,6 +88,18 @@ export const getBackground = (backgroundType: Background | undefined) => {
     }
 
     return DEFAULT_BACKGROUND
+}
+
+export const getTextAlign = (textAlign: TextAlign | undefined) => {
+    switch (textAlign) {
+        case TextAlign.CENTER:
+            return 'center'
+        case TextAlign.LEFT:
+            return 'left'
+        case TextAlign.RIGHT:
+            return 'right'
+    }
+    return 'left'
 }
 
 export const getColor = (color?: FontColor) => {

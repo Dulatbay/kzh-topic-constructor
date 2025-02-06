@@ -23,5 +23,3 @@ export const TitledContainerNode = forwardRef<HTMLDivElement, Props>(({obj, onCl
 });
 
 TitledContainerNode.displayName = "TitledContainerNode";
-
-export default TitledContainerNode;

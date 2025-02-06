@@ -5,6 +5,7 @@ import {useLazyFetchTopicByParamsQuery} from "../services/module/api.ts";
 import {useEffect} from "react";
 import {useSelectedNode} from "../context/hooks/context.ts";
 import {useSearchParams} from "react-router-dom";
+import Split from "react-split";
 
 const MainPage = () => {
     const [fetchTopicByParamsQuery, {isLoading, error, data}] = useLazyFetchTopicByParamsQuery();
@@ -42,15 +43,25 @@ const MainPage = () => {
         }
     };
 
-    if (isLoading) return <div>Loading...</div>;
-    if (error || !fullData) return <div>No data</div>;
+    if (isLoading || !fullData) return <div>Loading...</div>;
+    if (error) return <div>No data</div>;
 
 
     return (
-        <div className="flex w-full justify-stretch bg-gray-100">
-            <InfoBar obj={fullData} handleReset={handleReset}/>
-            <MainDrawBar obj={fullData}/>
-            <PropertiesBar/>
+        <div className="flex w-full justify-stretch bg-gray-100 h-screen">
+            <Split
+                className="flex w-full h-screen"
+                sizes={[20, 60, 20]}
+                minSize={200}
+                expandToMin={true}
+                gutterSize={8}
+                gutterAlign="center"
+                direction="horizontal"
+            >
+                <InfoBar obj={fullData} handleReset={handleReset}/>
+                <MainDrawBar obj={fullData}/>
+                <PropertiesBar/>
+            </Split>
         </div>
     );
 };

@@ -99,7 +99,7 @@ const InfoBar = ({obj, handleReset}: { obj?: BaseNode, handleReset: () => void }
     };
 
     return (
-        <div className="min-w-[400px] bg-[#0a0a0a] border-gray-200 p-4 h-screen overflow-y-scroll">
+        <div className="min-w-[400px] bg-[#0a0a0a] border-gray-200 p-4 h-screen overflow-y-auto">
             <Link to={"/"} className="block text-white mb-4">{`<- На главную`}</Link>
 
             <p className={`text-sm ${!isSaved ? "text-red-500" : "text-green-500"}`}>

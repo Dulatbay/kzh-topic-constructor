@@ -1,9 +1,9 @@
 import React from "react";
 
 export enum TextAlign {
-    LEFT = 'left',
-    RIGHT = 'right',
-    CENTER = 'center',
+    LEFT = 'LEFT',
+    RIGHT = 'RIGHT',
+    CENTER = 'CENTER',
 }
 
 export enum Background {
@@ -43,8 +43,12 @@ export enum FontSize {
     SMALL = "SMALL",
 }
 
+export interface CustomFields {
+    cut?: boolean;
+}
+
 // BaseNode abstract structure
-export interface BaseNode {
+export interface BaseNode extends CustomFields {
     id: string;
     nodeType: NodeType;
     background?: Background;

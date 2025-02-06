@@ -3,10 +3,12 @@ import {
     Background,
     BaseNode,
     BorderType,
+    FlexWrap,
     FontColor,
     FontSize,
     FontWeight,
-    JustifyContent, TextAlign
+    JustifyContent,
+    TextAlign
 } from "./types";
 import React from "react";
 
@@ -18,7 +20,7 @@ const DEFAULT_BACKGROUND = "#282828"
 
 
 const FONT_PRIMARY_COLOR = "#5348F2"
-const FONT_DEFAULT_COLOR = "#f3e2e2"
+const FONT_DEFAULT_COLOR = "#fff"
 const FONT_SECONDARY_COLOR = "#91898C"
 const FONT_TERTIARY_COLOR = "rgba(145,137,140,0.5)"
 
@@ -115,6 +117,15 @@ export const getColor = (color?: FontColor) => {
     }
 }
 
+export const getFlexWrap = (wrap: FlexWrap) => {
+    switch (wrap) {
+        case FlexWrap.WRAP:
+            return 'wrap'
+        case FlexWrap.NOWRAP:
+            return 'nowrap'
+    }
+}
+
 export const getBorder = (borderType: BorderType | undefined, color: FontColor | undefined, width: string = "1px") => {
     if (!borderType || borderType === BorderType.NONE) {
         return "none";
@@ -122,30 +133,29 @@ export const getBorder = (borderType: BorderType | undefined, color: FontColor |
     return `${width} ${borderType} ${getColor(color)}`;
 };
 
-export const getEnumValue = (value: string | null) => {
-    switch (value) {
-        case "SPACE_BETWEEN":
-            return JustifyContent.SPACE_BETWEEN;
-        case "SPACE_AROUND":
-            return JustifyContent.SPACE_AROUND;
-        case "CENTER":
-            return JustifyContent.CENTER;
-        case "STRETCH":
-            return JustifyContent.STRETCH;
-
+export const getJustifyContent = (justifyContent: JustifyContent) => {
+    switch (justifyContent) {
+        case JustifyContent.SPACE_BETWEEN:
+            return 'space-between';
+        case JustifyContent.CENTER:
+            return 'center';
+        case JustifyContent.SPACE_AROUND:
+            return 'space-around';
+        case JustifyContent.STRETCH:
+            return 'stretch';
     }
 };
 
-export const getAlignItemsValue = (value: string | null) => {
+export const getAlignItemsValue = (value: AlignItems) => {
     switch (value) {
-        case "CENTER":
-            return AlignItems.CENTER;
-        case "START":
-            return AlignItems.START;
-        case "END":
-            return AlignItems.END;
-        case "STRETCH":
-            return AlignItems.STRETCH;
+        case AlignItems.CENTER:
+            return 'center';
+        case AlignItems.END:
+            return 'end';
+        case AlignItems.START:
+            return 'start';
+        case AlignItems.STRETCH:
+            return 'stretch';
     }
 };
 

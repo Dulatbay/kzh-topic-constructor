@@ -1,11 +1,11 @@
 import {BaseNode} from "../utills/parser/types.ts";
 import {useState} from "react";
-import {FaChevronDown, FaChevronRight} from "react-icons/fa";
-import {isCenteredContainer, isIconText, isStackNode, isTextNode, isTitledContainer} from "../utills/parser/Parser.tsx";
 import {useSelectedNode} from "../context/hooks/context.ts";
 import {Link} from "react-router-dom";
+import TreeNode from "./TreeNode";
+import {isCenteredContainer, isIconText, isStackNode, isTitledContainer} from "../utills/parser/Parser.tsx";
 
-const InfoBar = ({obj, handleReset}: { obj?: BaseNode, handleReset: () => void }) => {
+const InfoBar = ({obj, handleReset}: { obj?: BaseNode; handleReset: () => void }) => {
     const {isSaved, saveFullData, selectedNodeData, setSelectedNodeData} = useSelectedNode();
     const [expandedNodes, setExpandedNodes] = useState<{ [key: string]: boolean }>({});
 
@@ -59,45 +59,6 @@ const InfoBar = ({obj, handleReset}: { obj?: BaseNode, handleReset: () => void }
         }
     };
 
-    const renderTree = (node: BaseNode): JSX.Element => {
-        let displayName = "Unknown Node";
-        if (isStackNode(node)) displayName = "Stack";
-        if (isTextNode(node)) displayName = "Text";
-        if (isIconText(node)) displayName = "IconText";
-        if (isTitledContainer(node)) displayName = "TitledContainer";
-        if (isCenteredContainer(node)) displayName = "CenteredContainer";
-
-        const children = getChildren(node);
-        const hasChildren = children && children.length > 0;
-        const isSelected = selectedNodeData?.id === node.id;
-        const borderStyle = isSelected ? "border-2 border-blue-500 bg-gray-800" : "";
-
-        return (
-            <div key={node.id} className="pl-4">
-                <div
-                    className={`flex items-center cursor-pointer py-1 px-2 rounded ${borderStyle}`}
-                    onClick={() => {
-                        handleClick(node);
-                        toggleNode(node.id);
-                    }}
-                >
-                    {hasChildren ? (
-                        expandedNodes[node.id] ? <FaChevronDown className="mr-2 text-gray-400"/> :
-                            <FaChevronRight className="mr-2 text-gray-400"/>
-                    ) : (
-                        <span className="w-4"></span>
-                    )}
-                    <span className="text-white">[{displayName}]</span>
-                </div>
-                {hasChildren && expandedNodes[node.id] && (
-                    <div className="pl-4 border-l border-gray-600">
-                        {children!.map(renderTree)}
-                    </div>
-                )}
-            </div>
-        );
-    };
-
     return (
         <div className="min-w-[400px] bg-[#0a0a0a] border-gray-200 p-4 h-screen overflow-y-auto">
             <Link to={"/"} className="block text-white mb-4">{`<- На главную`}</Link>
@@ -107,24 +68,20 @@ const InfoBar = ({obj, handleReset}: { obj?: BaseNode, handleReset: () => void }
             </p>
             <button
                 className="mt-4 w-full p-3 bg-blue-600 text-white font-bold rounded hover:bg-blue-500 transition mb-8"
-                onClick={handleSave}
-            >
+                onClick={handleSave}>
                 Сохранить
             </button>
             <button
                 className="mt-4 w-full p-3 bg-gray-600 text-white font-bold rounded hover:bg-gray-500 transition mb-8"
-                onClick={handleReset}
-            >
+                onClick={handleReset}>
                 По умолчанию
             </button>
-            <button
-                className="w-full p-3 bg-gray-600 text-white font-bold rounded hover:bg-gray-500 transition mb-4"
-                onClick={expandCurrentNode}
-                disabled={!selectedNodeData?.id}
-            >
+            <button className="w-full p-3 bg-gray-600 text-white font-bold rounded hover:bg-gray-500 transition mb-4"
+                    onClick={expandCurrentNode} disabled={!selectedNodeData?.id}>
                 Найти выбранный элемент
             </button>
-            {obj ? renderTree(obj) : <p className="text-white">No data</p>}
+            {obj ? <TreeNode node={obj} expandedNodes={expandedNodes} toggleNode={toggleNode} handleClick={handleClick}
+                             getChildren={getChildren}/> : <p className="text-white">No data</p>}
         </div>
     );
 };

@@ -11,8 +11,8 @@ interface SelectedNodeProviderProps {
     children: ReactNode;
 }
 
-function findAndObserveNode(node: BaseNode | Stack | CenteredContainer | IconText | TitledContainer, updateNodeInTree: (node: BaseNode) => BaseNode) {
-    if (isStackNode(node)) {
+function observeAndApply(node: BaseNode | Stack | CenteredContainer | IconText | TitledContainer, updateNodeInTree: (node: BaseNode) => BaseNode) {
+    if (isStackNode(node) && node.children && node.children.length > 0) {
         return {
             ...node,
             children: node.children.map(updateNodeInTree),
@@ -40,6 +40,7 @@ function findAndObserveNode(node: BaseNode | Stack | CenteredContainer | IconTex
     return node;
 }
 
+
 export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
     const [selectedNodeData, setSelectedNodeData] = useState<BaseNode | null>(null);
     const [fullData, setFullData] = useState<BaseNode | null>(null);
@@ -49,6 +50,7 @@ export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
     const [isAvailableToAdd, setIsAvailableToAdd] = useState(false);
     const [undoStack, setUndoStack] = useState<BaseNode[]>([]);
     const [redoStack, setRedoStack] = useState<BaseNode[]>([]);
+    const [isCutCleared, setIsCutCleared] = useState(false);
     const [setTopicContent] = useSetTopicContentMutation();
 
     const undo = useCallback(() => {
@@ -223,7 +225,125 @@ export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
         handleIsSaved(false);
         toast.success("Node copied successfully!");
     }, [fullData, handleSetFullData]);
+    const updateSelectedNodeProperty = useCallback(<T extends keyof (BaseNode & Stack & TitledContainer & Text & IconText)>(key: T, value: unknown) => {
+        if (!selectedNodeData || !fullData) return;
 
+        const updatedNode = {...selectedNodeData, [key]: value};
+        setSelectedNodeData(updatedNode);
+
+        const updateNodeInTree = (node: BaseNode): BaseNode => {
+            if (node.id === selectedNodeData.id) {
+                return updatedNode;
+            }
+            return observeAndApply(node, updateNodeInTree);
+        };
+
+        handleSetFullData(updateNodeInTree(fullData));
+        handleIsSaved(false);
+    }, [fullData, handleSetFullData, selectedNodeData]);
+    const moveNodeUpDown = useCallback((direction: "up" | "down") => {
+        if (!selectedNodeData || !fullData) return;
+
+        const updateNodeInTree = (node: BaseNode): BaseNode => {
+            if (isStackNode(node)) {
+                const index = node.children.findIndex(child => child.id === selectedNodeData.id);
+
+                if (index !== -1) {
+                    const newIndex = direction === "up" ? index - 1 : index + 1;
+
+                    if (newIndex < 0 || newIndex >= node.children.length) return node;
+
+                    const newChildren = [...node.children];
+                    const [movedNode] = newChildren.splice(index, 1);
+                    newChildren.splice(newIndex, 0, movedNode);
+
+                    return {...node, children: newChildren} as Stack;
+                }
+            }
+            return observeAndApply(node, updateNodeInTree);
+        };
+
+        const updatedTree = updateNodeInTree(fullData);
+        handleSetFullData(updatedTree);
+    }, [fullData, handleSetFullData, selectedNodeData]);
+    const moveNodeToHigherLevel = useCallback((direction: "up" | "down") => {
+        if (!selectedNodeData || !fullData) return;
+
+        let foundParent: Stack | null = null;
+        let foundNode: BaseNode | null = null;
+
+        const removeNodeFromParent = (node: BaseNode): BaseNode | null => {
+            if (isStackNode(node)) {
+                const newChildren = node.children.filter(
+                    (child) => child.id !== selectedNodeData.id
+                );
+
+                if (newChildren.length !== node.children.length) {
+                    foundParent = node;
+                    foundNode = selectedNodeData;
+                    return {...node, children: newChildren} as Stack;
+                }
+
+                return {
+                    ...node,
+                    children: node.children
+                        .map((child) => removeNodeFromParent(child))
+                        .filter(Boolean) as BaseNode[],
+                } as Stack;
+            }
+
+            if (isCenteredContainer(node) && isStackNode(node.childNode)) {
+                return {
+                    ...node,
+                    childNode: removeNodeFromParent(node.childNode),
+                } as CenteredContainer;
+            }
+
+            if (isTitledContainer(node) && isStackNode(node.content)) {
+                return {
+                    ...node,
+                    content: removeNodeFromParent(node.content),
+                } as TitledContainer;
+            }
+
+            return node;
+        };
+
+        const addNodeToNewParent = (node: BaseNode): BaseNode => {
+            if (direction === "up" && foundParent && node !== foundParent && isStackNode(node)) {
+                return {
+                    ...node,
+                    children: [foundNode, ...node.children],
+                } as Stack;
+            }
+
+            if (direction === "down") {
+                const findDeepestStack = (n: BaseNode): Stack | null => {
+                    if (isStackNode(n)) return n;
+                    if (isCenteredContainer(n)) return findDeepestStack(n.childNode);
+                    if (isTitledContainer(n)) return findDeepestStack(n.content);
+                    return null;
+                };
+
+                const deepestStack = findDeepestStack(node);
+                if (deepestStack) {
+                    return {
+                        ...deepestStack,
+                        children: [...deepestStack.children, foundNode],
+                    } as Stack;
+                }
+            }
+
+            return observeAndApply(node, addNodeToNewParent);
+        };
+
+
+        let updatedTree = removeNodeFromParent(fullData);
+        if (!foundParent || !foundNode) return;
+
+        updatedTree = addNodeToNewParent(updatedTree!);
+        handleSetFullData(updatedTree);
+    }, [fullData, handleSetFullData, selectedNodeData]);
 
     useEffect(() => {
         if (selectedNodeData) {
@@ -233,7 +353,7 @@ export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
                     setIsAvailableToAdd(node.nodeType == NodeType.STACK)
                     return node;
                 }
-                if (isStackNode(node)) {
+                if (isStackNode(node) && node.children && node.children.length > 0) {
                     for (const child of node.children) {
                         const found = findNodeById(child, 1);
                         if (found) {
@@ -266,12 +386,17 @@ export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
     }, [setSelectedNodeData, fullData, selectedNodeData]);
     useEffect(() => {
         if (fullData) {
+            if (isCutCleared && selectedNodeData) {
+                localStorage.setItem("copiedNode", JSON.stringify(selectedNodeData));
+                updateSelectedNodeProperty("cut", true);
+                setIsCutCleared(false);
+            }
             localStorage.setItem("fullData", JSON.stringify(fullData));
         } else {
             setSelectedNodeData(null);
             localStorage.removeItem("fullData");
         }
-    }, [fullData]);
+    }, [fullData, isCutCleared, selectedNodeData, updateSelectedNodeProperty]);
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.ctrlKey && event.key === "z") {
@@ -293,15 +418,62 @@ export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
                     toast.error("Only strict child of stack node can be copied");
                     return;
                 }
-                localStorage.setItem("copiedNode", JSON.stringify(selectedNodeData));
-                updateSelectedNodeProperty("cut", true)
-                setSelectedNodeData(null)
+
+                const resetCutFlag = (node: BaseNode): BaseNode => {
+                    const updatedNode = {...node};
+
+                    if (updatedNode.cut) {
+                        updatedNode.cut = false;
+                    }
+
+                    if (isStackNode(node)) {
+                        return {
+                            ...updatedNode,
+                            children: node.children.map(resetCutFlag),
+                        } as Stack;
+                    }
+                    if (isCenteredContainer(node)) {
+                        return {
+                            ...updatedNode,
+                            childNode: resetCutFlag(node.childNode),
+                        } as BaseNode;
+                    }
+                    if (isIconText(node)) {
+                        return {
+                            ...updatedNode,
+                            text: resetCutFlag(node.text),
+                        } as BaseNode;
+                    }
+                    if (isTitledContainer(node)) {
+                        return {
+                            ...updatedNode,
+                            titleText: resetCutFlag(node.titleText),
+                            content: resetCutFlag(node.content),
+                        } as BaseNode;
+                    }
+
+                    return updatedNode;
+                };
+
+                if (fullData) {
+                    const updatedFullData = resetCutFlag(fullData);
+                    setFullData(updatedFullData);
+                    setIsCutCleared(true);
+                }
+            } else if (event.ctrlKey && event.shiftKey && event.key === "ArrowUp") {
+                moveNodeToHigherLevel("up");
+            } else if (event.ctrlKey && event.shiftKey && event.key === "ArrowDown") {
+                moveNodeToHigherLevel("down");
+            } else if (event.ctrlKey && event.key === "ArrowUp") {
+                moveNodeUpDown("up");
+            } else if (event.ctrlKey && event.key === "ArrowDown") {
+                moveNodeUpDown("down");
             }
         };
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [undo, redo, handleDeleteNode, undoStack, handleCopy, selectedNodeData]);
+    }, [undo, redo, handleDeleteNode, undoStack, handleCopy, selectedNodeData, isChildOfStack, fullData, moveNodeUpDown, moveNodeToHigherLevel]);
 
     const handleSetApiResponse = (apiResponse: TopicDetailResponse) => {
         localStorage.setItem("apiResponse", JSON.stringify(apiResponse));
@@ -313,22 +485,6 @@ export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
         localStorage.setItem("isSaved", isSaved + "")
     }
 
-    const updateSelectedNodeProperty = <T extends keyof (BaseNode & Stack & TitledContainer & Text & IconText)>(key: T, value: unknown) => {
-        if (!selectedNodeData || !fullData) return;
-
-        const updatedNode = {...selectedNodeData, [key]: value};
-        setSelectedNodeData(updatedNode);
-
-        const updateNodeInTree = (node: BaseNode): BaseNode => {
-            if (node.id === selectedNodeData.id) {
-                return updatedNode;
-            }
-            return findAndObserveNode(node, updateNodeInTree);
-        };
-
-        handleSetFullData(updateNodeInTree(fullData));
-        handleIsSaved(false);
-    };
 
     const addNodeToSelectedStack = (newNode: BaseNode) => {
         if (!selectedNodeData || !fullData) return;
@@ -341,7 +497,7 @@ export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
                     } as Stack;
                 }
             }
-            return findAndObserveNode(node, updateNodeInTree);
+            return observeAndApply(node, updateNodeInTree);
         };
 
         handleSetFullData(updateNodeInTree(fullData));
@@ -384,6 +540,7 @@ export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
                 isDeletable: isChildOfStack,
                 reset,
                 setApiResponse: handleSetApiResponse,
+                moveNodeUpDown
             }}
         >
             {children}

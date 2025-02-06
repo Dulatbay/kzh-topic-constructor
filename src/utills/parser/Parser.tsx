@@ -29,10 +29,10 @@ export const isCenteredContainer = (node: BaseNode): node is CenteredContainer =
 export const Parser = ({obj}: { obj: BaseNode }): React.ReactNode => {
     const {selectedNodeData, setSelectedNodeData} = useSelectedNode();
 
-    if (!obj || obj.cut) return;
+    if (!obj) return;
 
     const handleClick = (e: React.MouseEvent, obj: BaseNode) => {
-        e.stopPropagation(); // ✅ Останавливаем всплытие событий, чтобы родитель не перехватывал клик
+        e.stopPropagation();
         setSelectedNodeData(obj);
     };
 

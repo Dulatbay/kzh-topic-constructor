@@ -13,9 +13,10 @@ export const TitledContainerNode = forwardRef<HTMLDivElement, Props>(({obj, onCl
     };
 
     const borderStyle = isSelected ? "!border-2 !border-blue-500" : "border-2 border-transparent";
+    const bg = obj.cut ? '!opacity-40' : '';
 
     return (
-        <div ref={ref} style={containerStyles} className={`flex flex-col gap-4 ${borderStyle}`} onClick={onClick}>
+        <div ref={ref} style={containerStyles} className={`flex flex-col gap-4 ${borderStyle} ${bg}`} onClick={onClick}>
             {Parser({obj: obj.titleText})}
             {Parser({obj: obj.content})}
         </div>

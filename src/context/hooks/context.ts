@@ -17,6 +17,7 @@ interface SelectedNodeContextProps {
     handleIsSaved: (isSaved: boolean) => void;
     reset: () => void;
     setApiResponse: (apiResponse: TopicDetailResponse) => void;
+    moveNodeUpDown: (direction: "up" | "down") => void;
 }
 
 export const SelectedNodeContext = createContext<SelectedNodeContextProps | undefined>(undefined);

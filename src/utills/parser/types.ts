@@ -79,15 +79,15 @@ export enum NodeType {
 }
 
 export enum FlexWrap {
-    WRAP = "wrap", NOWRAP = "nowrap"
+    WRAP = "WRAP", NOWRAP = "NOWRAP"
 }
 
 export enum JustifyContent {
-    SPACE_BETWEEN = 'space-between', SPACE_AROUND = 'space-around', CENTER = 'center', STRETCH = 'stretch'
+    SPACE_BETWEEN = 'SPACE_BETWEEN', SPACE_AROUND = 'SPACE_AROUND', CENTER = 'CENTER', STRETCH = 'STRETCH'
 }
 
 export enum AlignItems {
-    START = 'start', CENTER = 'center', END = 'end', STRETCH = 'stretch'
+    START = 'START', CENTER = 'CENTER', END = 'END', STRETCH = 'STRETCH'
 }
 
 // Specific node types

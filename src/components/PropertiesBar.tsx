@@ -182,7 +182,7 @@ const PropertiesBar = () => {
                         type="number"
                         className="w-full p-2 bg-gray-700 text-white rounded"
                         value={selectedNode.flex || ""}
-                        onChange={(e) => handleChange("overflowY", (e.target.value))}
+                        onChange={(e) => handleChange("flex", (e.target.value))}
                     />
                 </div>
                 <div className="mt-2">
@@ -194,11 +194,51 @@ const PropertiesBar = () => {
                         onChange={(e) => handleChange("minHeight", (e.target.value))}
                     />
                 </div>
+                <div className="mt-2">
+                    <label className="block text-gray-300 mb-1">Min Width</label>
+                    <input
+                        type="text"
+                        className="w-full p-2 bg-gray-700 text-white rounded"
+                        value={selectedNode.minWidth || ""}
+                        onChange={(e) => handleChange("minWidth", (e.target.value))}
+                    />
+                </div>
+                <div className="mt-2">
+                    <label className="block text-gray-300 mb-1">Width</label>
+                    <input
+                        type="text"
+                        className="w-full p-2 bg-gray-700 text-white rounded"
+                        value={selectedNode.width || ""}
+                        onChange={(e) => handleChange("width", (e.target.value))}
+                    />
+                </div>
+                <div className="mt-2">
+                    <label className="block text-gray-300 mb-1">Height</label>
+                    <input
+                        type="text"
+                        className="w-full p-2 bg-gray-700 text-white rounded"
+                        value={selectedNode.height || ""}
+                        onChange={(e) => handleChange("height", (e.target.value))}
+                    />
+                </div>
             </CollapsibleSection>
 
             {/* Свойства для текста */}
             {isTextNode(selectedNode) && (
                 <CollapsibleSection title={"Text node style"}>
+                    <div className="mt-2">
+                        <label className="block text-gray-300 mb-1">Font color</label>
+                        <select
+                            className="w-full p-2 bg-gray-700 text-white rounded"
+                            value={selectedNode.fontColor}
+                            onChange={(e) => handleChange("fontColor", e.target.value)}
+                        >
+                            {Object.values(FontColor).map((option) => (
+                                <option key={option} value={option}>{option}</option>
+                            ))}
+                        </select>
+                    </div>
+
                     <div className="mt-2">
                         <label className="block text-gray-300 mb-1">Font size</label>
                         <select

@@ -33,6 +33,7 @@ export const TextNode = forwardRef<HTMLParagraphElement, Props>(({obj, onClick, 
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        e.stopPropagation()
         if (e.key === "Enter") {
             handleBlur();
         }
@@ -47,6 +48,7 @@ export const TextNode = forwardRef<HTMLParagraphElement, Props>(({obj, onClick, 
     };
 
     const borderStyle = isSelected ? "!border-2 !border-blue-500" : "border-2 border-transparent";
+    const bg = obj.cut ? '!opacity-40' : '';
 
     return (
         <>
@@ -54,8 +56,9 @@ export const TextNode = forwardRef<HTMLParagraphElement, Props>(({obj, onClick, 
                 <input
                     ref={inputRef}
                     type="text"
-                    className="w-full p-1 border border-gray-400 rounded bg-gray-900 text-white"
+                    className={`${bg} ${bg}  p-1 border border-gray-400 rounded bg-gray-900 text-white`}
                     value={text}
+                    style={style}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     onKeyDown={handleKeyDown}
@@ -66,7 +69,7 @@ export const TextNode = forwardRef<HTMLParagraphElement, Props>(({obj, onClick, 
                     style={style}
                     onDoubleClick={handleDoubleClick}
                     onClick={onClick}
-                    className={`${borderStyle}`}
+                    className={`${borderStyle} ${bg}`}
                     dangerouslySetInnerHTML={{__html: obj.htmltext}}
                 ></p>
             )}

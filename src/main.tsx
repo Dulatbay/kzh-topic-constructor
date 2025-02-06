@@ -14,34 +14,34 @@ import {Flip, ToastContainer} from "react-toastify";
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <Provider store={store}>
-            <SelectedNodeProvider>
-                <ToastContainer
-                    position="top-center"
-                    autoClose={2000}
-                    hideProgressBar={false}
-                    newestOnTop={false}
-                    closeOnClick={false}
-                    rtl={false}
-                    pauseOnFocusLoss
-                    draggable
-                    pauseOnHover
-                    theme="dark"
-                    transition={Flip}
-                />
-                <Router>
-                    <Routes>
-                        <Route element={<ProtectedRoute adminOnly />}>
-                            <Route path="/main" element={<MainPage/>}/>
-                        </Route>
-                        <Route path="/modules" element={<ModulesPage/>}/>
+                <SelectedNodeProvider>
+                    <ToastContainer
+                        position="top-center"
+                        autoClose={2000}
+                        hideProgressBar={false}
+                        newestOnTop={false}
+                        closeOnClick={false}
+                        rtl={false}
+                        pauseOnFocusLoss
+                        draggable
+                        pauseOnHover
+                        theme="dark"
+                        transition={Flip}
+                    />
+                    <Router>
+                        <Routes>
+                            <Route element={<ProtectedRoute adminOnly/>}>
+                                <Route path="/main" element={<MainPage/>}/>
+                            </Route>
+                            <Route path="/modules" element={<ModulesPage/>}/>
 
 
-                        <Route path="/login" element={<LoginPage/>}/>
+                            <Route path="/login" element={<LoginPage/>}/>
 
-                        <Route path="*" element={<Navigate to="/modules" replace/>}/>
-                    </Routes>
-                </Router>
-            </SelectedNodeProvider>
+                            <Route path="*" element={<Navigate to="/modules" replace/>}/>
+                        </Routes>
+                    </Router>
+                </SelectedNodeProvider>
         </Provider>
     </StrictMode>,
 )

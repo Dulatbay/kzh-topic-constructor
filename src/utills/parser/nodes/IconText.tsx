@@ -13,11 +13,12 @@ export const IconText = forwardRef<HTMLDivElement, Props>(({obj, isSelected, onC
     };
 
     const borderStyle = isSelected ? "!border-2 !border-blue-500" : "border-2 border-transparent";
+    const bg = obj.cut ? '!opacity-40' : '';
 
     return (
         <div ref={ref}
              style={style}
-             className={`flex gap-4 ${borderStyle}`}
+             className={`flex gap-4 ${borderStyle} ${bg}`}
              onClick={onClick}>
             {obj.icon}
             {Parser({obj: obj.text})}

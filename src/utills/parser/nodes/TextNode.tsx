@@ -60,7 +60,7 @@ export const TextNode = forwardRef<HTMLParagraphElement, Props>(({obj, onClick, 
                     value={text}
                     style={style}
                     onChange={handleChange}
-                    onBlur={handleBlur}
+                    // onBlur={handleBlur}
                     onKeyDown={handleKeyDown}
                 />
             ) : (

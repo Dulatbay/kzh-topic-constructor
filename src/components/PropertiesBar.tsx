@@ -20,7 +20,7 @@ import {
     isTextNode,
     isStackNode, isIconText,
 } from "../utills/parser/Parser.tsx";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useRef} from "react";
 import {useSelectedNode} from "../context/hooks/context.ts";
 import {FaChevronDown, FaChevronRight} from "react-icons/fa";
 
@@ -44,6 +44,50 @@ const CollapsibleSection = ({title, children}: {
         </div>
     );
 };
+
+interface Props {
+    selectedNode: Text;
+    handleChange: <T extends keyof (BaseNode & Stack & TitledContainer & Text & CenteredContainer & IconText & Image)>(
+        key: T,
+        value: unknown
+    ) => void;
+}
+
+const TextareaComponent: React.FC<Props> = ({selectedNode, handleChange}) => {
+    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+    const [text, setText] = useState(selectedNode.htmltext || "");
+
+    useEffect(() => {
+        setText(selectedNode.htmltext || "");
+    }, [selectedNode.htmltext]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setText(e.target.value);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        e.stopPropagation()
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleChange("htmltext" as keyof Props["selectedNode"], text);
+        }
+    };
+
+    return (
+        <div className="mt-2">
+            <label className="block text-gray-300 mb-1">HTML Text</label>
+            <textarea
+                ref={textareaRef}
+                className="w-full p-2 bg-gray-700 text-white rounded"
+                value={text}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                onBlur={() => handleChange("htmltext", text)}
+            />
+        </div>
+    );
+};
+
 
 const PropertiesBar = () => {
     const {selectedNodeData, updateSelectedNodeProperty, handleDeleteNode, isDeletable} = useSelectedNode();
@@ -277,14 +321,7 @@ const PropertiesBar = () => {
                             ))}
                         </select>
                     </div>
-                    <div className="mt-2">
-                        <label className="block text-gray-300 mb-1">HTML Text</label>
-                        <textarea
-                            className="w-full p-2 bg-gray-700 text-white rounded"
-                            value={selectedNode.htmltext || ""}
-                            onChange={(e) => handleChange("htmltext", (e.target.value))}
-                        />
-                    </div>
+                    <TextareaComponent selectedNode={selectedNode} handleChange={handleChange}/>
                 </CollapsibleSection>
             )}
 

@@ -24,7 +24,6 @@ createRoot(document.getElementById('root')!).render(
                         rtl={false}
                         pauseOnFocusLoss
                         draggable
-                        pauseOnHover
                         theme="dark"
                         transition={Flip}
                     />

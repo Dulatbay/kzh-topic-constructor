@@ -63,7 +63,7 @@ export interface BaseNode extends CustomFields {
     links?: Link[];
     overflowX?: string;
     overflowY?: string;
-    flex?: number;
+    flex?: string;
     minWidth?: string;
     minHeight?: string;
 }

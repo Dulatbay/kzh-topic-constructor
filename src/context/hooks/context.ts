@@ -16,8 +16,10 @@ interface SelectedNodeContextProps {
     isAvailableToAdd: boolean;
     handleIsSaved: (isSaved: boolean) => void;
     reset: () => void;
+    apiResponse: TopicDetailResponse | null;
     setApiResponse: (apiResponse: TopicDetailResponse) => void;
     moveNodeUpDown: (direction: "up" | "down") => void;
+    moveNode: (draggedNodeId: string, targetNodeId: string, dropPosition: "before" | "after" | "inside") => void;
 }
 
 export const SelectedNodeContext = createContext<SelectedNodeContextProps | undefined>(undefined);

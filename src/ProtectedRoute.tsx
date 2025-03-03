@@ -1,9 +1,10 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 import {RootState} from "./redux/store.ts";
 
 export default function ProtectedRoute({ adminOnly = false }: { adminOnly?: boolean }) {
     const { token, role } = useSelector((state: RootState) => state.auth);
+
 
     if (!token) {
         return <Navigate to="/login" replace />;

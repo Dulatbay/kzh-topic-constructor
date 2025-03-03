@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import {ReactNode, useCallback, useEffect, useState} from "react";
 import {
     BaseNode,
     CenteredContainer,
@@ -8,12 +8,12 @@ import {
     Text,
     TitledContainer,
 } from "../utills/parser/types.ts";
-import { SelectedNodeContext } from "./hooks/context.ts";
-import { isCenteredContainer, isIconText, isStackNode, isTitledContainer } from "../utills/parser/Parser.tsx";
-import { useSetTopicContentMutation } from "../services/module/api.ts";
-import { TopicDetailResponse } from "../services/module/types.ts";
-import { toast } from "react-toastify";
-import { v4 as uuidv4 } from "uuid";
+import {SelectedNodeContext} from "./hooks/context.ts";
+import {isCenteredContainer, isIconText, isStackNode, isTitledContainer} from "../utills/parser/Parser.tsx";
+import {useSetTopicContentMutation} from "../services/module/api.ts";
+import {TopicDetailResponse} from "../services/module/types.ts";
+import {toast} from "react-toastify";
+import {v4 as uuidv4} from "uuid";
 
 interface SelectedNodeProviderProps {
     children: ReactNode;
@@ -51,7 +51,7 @@ function observeAndApply(
     return node;
 }
 
-export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) => {
+export const SelectedNodeProvider = ({children}: SelectedNodeProviderProps) => {
     const [selectedNodeData, setSelectedNodeData] = useState<BaseNode | null>(null);
     const [fullData, setFullData] = useState<BaseNode | null>(null);
     const [apiResponse, setApiResponse] = useState<TopicDetailResponse | null>(
@@ -89,7 +89,7 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
         }
         toast
             .promise(
-                setTopicContent({ topicId: apiResponse.current.topicId, content: fullData }).unwrap(),
+                setTopicContent({topicId: apiResponse.current.topicId, content: fullData}).unwrap(),
                 {
                     error: "Failed to save, trying again...",
                 }
@@ -152,6 +152,7 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
     );
 
     const handleDeleteNode = useCallback(() => {
+        console.log("SALAM")
         const deleteNodeById = (id: string, node: BaseNode | null): BaseNode | null => {
             if (!node) return null;
 
@@ -167,11 +168,11 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
             }
 
             if (isCenteredContainer(node)) {
-                return node.id === id ? null : { ...node } as BaseNode;
+                return node.id === id ? null : {...node, childNode: deleteNodeById(id, node.childNode)} as BaseNode;
             }
 
             if (isIconText(node)) {
-                return node.id === id ? null : { ...node } as BaseNode;
+                return node.id === id ? null : {...node} as BaseNode;
             }
 
             if (isTitledContainer(node)) {
@@ -210,7 +211,7 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
         const nodeToCopy = JSON.parse(nodeToCopyString!) as BaseNode;
 
         const deepCopyNode = (node: BaseNode): BaseNode => {
-            const newNode = { ...node, id: uuidv4() };
+            const newNode = {...node, id: uuidv4()};
 
             if (isStackNode(node)) {
                 return {
@@ -304,7 +305,7 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
         <T extends keyof (BaseNode & Stack & TitledContainer & Text & IconText)>(key: T, value: unknown) => {
             if (!selectedNodeData || !fullData) return;
 
-            const updatedNode = { ...selectedNodeData, [key]: value };
+            const updatedNode = {...selectedNodeData, [key]: value};
             setSelectedNodeData(updatedNode);
 
             const updateNodeInTree = (node: BaseNode): BaseNode => {
@@ -337,7 +338,7 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
                         const [movedNode] = newChildren.splice(index, 1);
                         newChildren.splice(newIndex, 0, movedNode);
 
-                        return { ...node, children: newChildren } as Stack;
+                        return {...node, children: newChildren} as Stack;
                     }
                 }
                 return observeAndApply(node, updateNodeInTree);
@@ -363,7 +364,7 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
                     if (newChildren.length !== node.children.length) {
                         foundParent = node;
                         foundNode = selectedNodeData;
-                        return { ...node, children: newChildren } as Stack;
+                        return {...node, children: newChildren} as Stack;
                     }
 
                     return {
@@ -375,11 +376,11 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
                 }
 
                 if (isCenteredContainer(node) && isStackNode(node.childNode)) {
-                    return { ...node, childNode: removeNodeFromParent(node.childNode) } as CenteredContainer;
+                    return {...node, childNode: removeNodeFromParent(node.childNode)} as CenteredContainer;
                 }
 
                 if (isTitledContainer(node) && isStackNode(node.content)) {
-                    return { ...node, content: removeNodeFromParent(node.content) } as TitledContainer;
+                    return {...node, content: removeNodeFromParent(node.content)} as TitledContainer;
                 }
 
                 return node;
@@ -387,7 +388,7 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
 
             const addNodeToNewParent = (node: BaseNode): BaseNode => {
                 if (direction === "up" && foundParent && node !== foundParent && isStackNode(node)) {
-                    return { ...node, children: [foundNode, ...node.children] } as Stack;
+                    return {...node, children: [foundNode, ...node.children]} as Stack;
                 }
 
                 if (direction === "down") {
@@ -400,7 +401,7 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
 
                     const deepestStack = findDeepestStack(node);
                     if (deepestStack) {
-                        return { ...deepestStack, children: [...deepestStack.children, foundNode] } as Stack;
+                        return {...deepestStack, children: [...deepestStack.children, foundNode]} as Stack;
                     }
                 }
 
@@ -434,13 +435,13 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
                         }
                     }
                     newChildren = newChildren.map((child) => removeNode(child));
-                    return { ...node, children: newChildren } as Stack;
+                    return {...node, children: newChildren} as Stack;
                 }
                 if (isCenteredContainer(node)) {
-                    return { ...node, childNode: removeNode(node.childNode) } as CenteredContainer;
+                    return {...node, childNode: removeNode(node.childNode)} as CenteredContainer;
                 }
                 if (isIconText(node)) {
-                    return { ...node, text: removeNode(node.text) } as IconText;
+                    return {...node, text: removeNode(node.text)} as IconText;
                 }
                 if (isTitledContainer(node)) {
                     return {
@@ -465,7 +466,7 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
                     // Если текущий узел – целевой стек, вставляем внутрь (даже если он пустой)
                     if (node.id === targetNodeId && dropPosition === "inside") {
                         const newChildren = [...node.children, removedNode!];
-                        return { ...node, children: newChildren } as Stack;
+                        return {...node, children: newChildren} as Stack;
                     }
                     let newChildren = [...node.children];
                     for (let i = 0; i < newChildren.length; i++) {
@@ -487,17 +488,17 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
                                     newChildren.splice(i + 1, 0, removedNode!);
                                 }
                             }
-                            return { ...node, children: newChildren } as Stack;
+                            return {...node, children: newChildren} as Stack;
                         }
                     }
                     newChildren = newChildren.map((child) => insertNode(child));
-                    return { ...node, children: newChildren } as Stack;
+                    return {...node, children: newChildren} as Stack;
                 }
                 if (isCenteredContainer(node)) {
-                    return { ...node, childNode: insertNode(node.childNode) } as CenteredContainer;
+                    return {...node, childNode: insertNode(node.childNode)} as CenteredContainer;
                 }
                 if (isIconText(node)) {
-                    return { ...node, text: insertNode(node.text) } as IconText;
+                    return {...node, text: insertNode(node.text)} as IconText;
                 }
                 if (isTitledContainer(node)) {
                     return {
@@ -573,12 +574,14 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             const activeEl = document.activeElement;
+            console.log("ACTIVE EL", activeEl)
             if (
                 activeEl &&
                 (activeEl.tagName === "INPUT" ||
                     activeEl.tagName === "TEXTAREA" ||
                     activeEl.getAttribute("contenteditable") === "true")
             ) {
+                console.log("RETURN")
                 return;
             }
 
@@ -589,6 +592,7 @@ export const SelectedNodeProvider = ({ children }: SelectedNodeProviderProps) =>
             } else if (event.key === "Delete") {
                 handleDeleteNode();
             } else if (event.ctrlKey && event.key === "c") {
+                console.log("SALAM")
                 if (!isChildOfStack) {
                     toast.error("Only strict child of stack node can be copied");
                     return;

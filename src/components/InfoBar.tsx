@@ -62,7 +62,7 @@ const InfoBar = ({obj, handleReset}: InfoBarProps) => {
     return (
         <div className="min-w-[400px] bg-[#0a0a0a] border-gray-200 p-4 h-screen overflow-y-auto">
             <Link to={"/"} className="block text-white mb-4">{`<- На главную`}</Link>
-            <h1 className={"font-bold text-xl"}> <span className={"font-medium text-sm text-gray-400"}>Текущий топик - </span> {apiResponse && apiResponse.current.topicName}</h1>
+            <h1 className={"font-bold text-xl"}> <span className={"font-medium text-sm text-gray-400"}>Текущий топик - </span> {apiResponse && apiResponse?.current?.topicName}</h1>
             <p className={`text-sm ${!isSaved ? "text-red-500" : "text-green-500"}`}>
                 {!isSaved ? "Не сохранено" : "Сохранено"}
             </p>

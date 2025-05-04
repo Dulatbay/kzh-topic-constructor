@@ -11,12 +11,11 @@ const MainPage = () => {
     const [fetchTopicByParamsQuery, {isLoading, error, data}] = useLazyFetchTopicByParamsQuery();
     const {fullData, setFullData, reset, setApiResponse} = useSelectedNode();
     const [searchParams] = useSearchParams();
-    const moduleNumber = searchParams.get("module") ?? "0";
-    const topicNumber = searchParams.get("topic") ?? "0";
+    const topicId = searchParams.get("topicId") ?? "0";
 
     useEffect(() => {
         const fetch = async () => {
-            await fetchTopicByParamsQuery({moduleNumber, topicNumber});
+            await fetchTopicByParamsQuery({topicId});
             if (data) {
                 setFullData(data.content)
                 setApiResponse(data)
@@ -29,12 +28,12 @@ const MainPage = () => {
         } else {
             fetch()
         }
-    }, [data, fetchTopicByParamsQuery, moduleNumber, topicNumber]);
+    }, [data, fetchTopicByParamsQuery, topicId]);
 
 
     const handleReset = async () => {
         reset()
-        await fetchTopicByParamsQuery({moduleNumber: moduleNumber, topicNumber: topicNumber});
+        await fetchTopicByParamsQuery({topicId});
 
         if (data) {
             setFullData(data.content);

@@ -29,7 +29,7 @@ createRoot(document.getElementById('root')!).render(
                     />
                     <Router>
                         <Routes>
-                            <Route element={<ProtectedRoute adminOnly/>}>
+                            <Route element={<ProtectedRoute/>}>
                                 <Route path="/main" element={<MainPage/>}/>
                             </Route>
                             <Route path="/modules" element={<ModulesPage/>}/>
